@@ -21,6 +21,12 @@ public class OrderRequestDto {
 
     private String promoCode;
 
+    private String holderName;
+
+    private String holderEmail;
+
+    private String holderDocument;
+
     @NotEmpty
     private List<OrderItemRequest> items;
 
@@ -48,6 +54,12 @@ public class OrderRequestDto {
 
         @NotNull
         private BigDecimal unitPrice;
+
+        private String holderName;
+
+        private String holderEmail;
+
+        private String holderDocument;
     }
 
 }

@@ -52,6 +52,9 @@ public class PromoCode {
     @Column(name = "is_active")
     private Boolean isActive;
 
+    @Version
+    private Long version;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

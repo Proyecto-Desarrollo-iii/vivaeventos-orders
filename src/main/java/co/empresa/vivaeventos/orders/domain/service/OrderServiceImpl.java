@@ -13,14 +13,23 @@ import co.empresa.vivaeventos.orders.domain.repository.IPromoCodeRepository;
 import co.empresa.vivaeventos.orders.domain.repository.IPromoCodeUsageRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -31,6 +40,10 @@ public class OrderServiceImpl implements IOrderService {
     private final IOrderRepository orderRepository;
     private final IPromoCodeRepository promoCodeRepository;
     private final IPromoCodeUsageRepository promoCodeUsageRepository;
+    private final RestTemplate restTemplate;
+
+    @Value("${services.tickets.url:http://tickets:8085}")
+    private String ticketsUrl;
 
     @Override
     @Transactional
@@ -69,28 +82,82 @@ public class OrderServiceImpl implements IOrderService {
         order.setTotal(total);
 
         if (request.getPromoCode() != null && !request.getPromoCode().isBlank()) {
-            PromoCode promo = promoCodeRepository.findByCode(request.getPromoCode().toUpperCase())
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid promo code: " + request.getPromoCode()));
-
-            validatePromoCode(promo, total);
-            BigDecimal discount = calculateDiscount(promo, total);
-            order.setDiscount(discount);
-            order.setPromoCode(promo.getCode());
-            order.setPromoCodeId(promo.getId());
-
-            promo.setUsesCount(promo.getUsesCount() + 1);
-            promoCodeRepository.save(promo);
-
-            PromoCodeUsage usage = new PromoCodeUsage();
-            usage.setPromoCode(promo);
-            usage.setOrderId(order.getId());
-            usage.setUserId(request.getUserId());
-            promoCodeUsageRepository.save(usage);
+            applyPromoCode(request, order, total);
         }
 
         order.setTotal(order.getSubtotal().subtract(order.getDiscount()));
         order = orderRepository.save(order);
+
+        issueTicketsForOrder(order, request);
+
         return toResponseDto(order);
+    }
+
+    private void applyPromoCode(OrderRequestDto request, Order order, BigDecimal total) {
+        int maxRetries = 3;
+        for (int attempt = 0; attempt < maxRetries; attempt++) {
+            try {
+                PromoCode promo = promoCodeRepository.findByCode(request.getPromoCode().toUpperCase())
+                        .orElseThrow(() -> new IllegalArgumentException("Invalid promo code: " + request.getPromoCode()));
+
+                validatePromoCode(promo, total);
+                BigDecimal discount = calculateDiscount(promo, total);
+                order.setDiscount(discount);
+                order.setPromoCode(promo.getCode());
+                order.setPromoCodeId(promo.getId());
+
+                promo.setUsesCount(promo.getUsesCount() + 1);
+                promoCodeRepository.save(promo);
+
+                PromoCodeUsage usage = new PromoCodeUsage();
+                usage.setPromoCode(promo);
+                usage.setOrderId(order.getId());
+                usage.setUserId(request.getUserId());
+                promoCodeUsageRepository.save(usage);
+
+                return;
+            } catch (ObjectOptimisticLockingFailureException e) {
+                if (attempt == maxRetries - 1) {
+                    throw new IllegalStateException("Conflicto de concurrencia al aplicar código promocional. Intente nuevamente.");
+                }
+            }
+        }
+    }
+
+    private void issueTicketsForOrder(Order order, OrderRequestDto request) {
+        String endpoint = ticketsUrl + "/api/v1/issued-tickets/issue";
+
+        for (OrderItemRequest itemReq : request.getItems()) {
+            String holderName = itemReq.getHolderName() != null ? itemReq.getHolderName() : request.getHolderName();
+            String holderEmail = itemReq.getHolderEmail() != null ? itemReq.getHolderEmail() : request.getHolderEmail();
+            String holderDocument = itemReq.getHolderDocument() != null ? itemReq.getHolderDocument() : request.getHolderDocument();
+
+            for (int i = 0; i < itemReq.getQuantity(); i++) {
+                Map<String, Object> ticketRequest = new HashMap<>();
+                ticketRequest.put("orderId", order.getId().toString());
+                ticketRequest.put("eventId", itemReq.getEventId().toString());
+                ticketRequest.put("ticketTypeId", itemReq.getTicketTypeId().toString());
+                ticketRequest.put("ticketType", itemReq.getTicketTypeName());
+                ticketRequest.put("eventName", itemReq.getEventName());
+                ticketRequest.put("holderName", holderName);
+                ticketRequest.put("holderEmail", holderEmail);
+                ticketRequest.put("holderDocument", holderDocument);
+                ticketRequest.put("price", itemReq.getUnitPrice());
+
+                HttpEntity<Map<String, Object>> entity = new HttpEntity<>(ticketRequest);
+
+                try {
+                    restTemplate.exchange(
+                            endpoint,
+                            HttpMethod.POST,
+                            entity,
+                            new ParameterizedTypeReference<Map<String, Object>>() {}
+                    );
+                } catch (Exception e) {
+                    throw new RuntimeException("Error al emitir boleta desde orden " + order.getId() + ": " + e.getMessage(), e);
+                }
+            }
+        }
     }
 
     @Override
