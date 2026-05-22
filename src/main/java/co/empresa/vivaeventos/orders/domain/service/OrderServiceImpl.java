@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -47,7 +48,7 @@ public class OrderServiceImpl implements IOrderService {
 
     @Override
     @Transactional
-    public OrderResponseDto createOrder(OrderRequestDto request) {
+    public OrderResponseDto createOrder(OrderRequestDto request, String authHeader) {
         Order order = new Order();
         order.setUserId(request.getUserId());
         order.setEventId(request.getEventId());
@@ -88,8 +89,6 @@ public class OrderServiceImpl implements IOrderService {
         order.setTotal(order.getSubtotal().subtract(order.getDiscount()));
         order = orderRepository.save(order);
 
-        issueTicketsForOrder(order, request);
-
         return toResponseDto(order);
     }
 
@@ -124,8 +123,11 @@ public class OrderServiceImpl implements IOrderService {
         }
     }
 
-    private void issueTicketsForOrder(Order order, OrderRequestDto request) {
+    private void issueTicketsForOrder(Order order, OrderRequestDto request, String authHeader) {
         String endpoint = ticketsUrl + "/api/v1/issued-tickets/issue";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", authHeader);
 
         for (OrderItemRequest itemReq : request.getItems()) {
             String holderName = itemReq.getHolderName() != null ? itemReq.getHolderName() : request.getHolderName();
@@ -144,7 +146,7 @@ public class OrderServiceImpl implements IOrderService {
                 ticketRequest.put("holderDocument", holderDocument);
                 ticketRequest.put("price", itemReq.getUnitPrice());
 
-                HttpEntity<Map<String, Object>> entity = new HttpEntity<>(ticketRequest);
+                HttpEntity<Map<String, Object>> entity = new HttpEntity<>(ticketRequest, headers);
 
                 try {
                     restTemplate.exchange(

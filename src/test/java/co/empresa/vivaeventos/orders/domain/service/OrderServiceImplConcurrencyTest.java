@@ -116,7 +116,7 @@ class OrderServiceImplConcurrencyTest {
         for (int i = 0; i < threadCount; i++) {
             executor.submit(() -> {
                 try {
-                    service.createOrder(request);
+                    service.createOrder(request, "Bearer test-token");
                     successCount.incrementAndGet();
                 } catch (Exception e) {
                     failCount.incrementAndGet();

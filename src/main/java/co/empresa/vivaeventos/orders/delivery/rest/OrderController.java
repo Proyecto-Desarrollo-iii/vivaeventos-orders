@@ -20,13 +20,17 @@ public class OrderController {
     private final IOrderService orderService;
 
     @PostMapping("/orders")
-    public ResponseEntity<OrderResponseDto> createOrder(@Valid @RequestBody OrderRequestDto request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrder(request));
+    public ResponseEntity<OrderResponseDto> createOrder(
+            @Valid @RequestBody OrderRequestDto request,
+            @RequestHeader("Authorization") String authHeader) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrder(request, authHeader));
     }
 
     @PostMapping("/ordenes")
-    public ResponseEntity<OrderResponseDto> crearOrden(@Valid @RequestBody OrderRequestDto request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrder(request));
+    public ResponseEntity<OrderResponseDto> crearOrden(
+            @Valid @RequestBody OrderRequestDto request,
+            @RequestHeader("Authorization") String authHeader) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrder(request, authHeader));
     }
 
     @GetMapping("/orders/{id}")
