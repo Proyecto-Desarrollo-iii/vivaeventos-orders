@@ -76,6 +76,9 @@ public class OrderServiceImpl implements IOrderService {
             item.setQuantity(itemReq.getQuantity());
             item.setUnitPrice(itemReq.getUnitPrice());
             item.setSubtotal(subtotal);
+            item.setHolderName(itemReq.getHolderName() != null ? itemReq.getHolderName() : request.getHolderName());
+            item.setHolderEmail(itemReq.getHolderEmail() != null ? itemReq.getHolderEmail() : request.getHolderEmail());
+            item.setHolderDocument(itemReq.getHolderDocument() != null ? itemReq.getHolderDocument() : request.getHolderDocument());
             order.getItems().add(item);
         }
 
@@ -255,6 +258,9 @@ public class OrderServiceImpl implements IOrderService {
             itemDto.setQuantity(item.getQuantity());
             itemDto.setUnitPrice(item.getUnitPrice());
             itemDto.setSubtotal(item.getSubtotal());
+            itemDto.setHolderName(item.getHolderName());
+            itemDto.setHolderEmail(item.getHolderEmail());
+            itemDto.setHolderDocument(item.getHolderDocument());
             return itemDto;
         }).collect(Collectors.toList()));
         dto.setCreatedAt(order.getCreatedAt());

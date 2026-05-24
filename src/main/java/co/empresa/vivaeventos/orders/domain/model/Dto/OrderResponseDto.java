@@ -41,6 +41,9 @@ public class OrderResponseDto {
         private Integer quantity;
         private BigDecimal unitPrice;
         private BigDecimal subtotal;
+        private String holderName;
+        private String holderEmail;
+        private String holderDocument;
     }
 
 }

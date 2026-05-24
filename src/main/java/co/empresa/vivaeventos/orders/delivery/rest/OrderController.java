@@ -48,7 +48,7 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getAllOrders());
     }
 
-    @PatchMapping("/orders/{id}/status")
+    @PutMapping("/orders/{id}/status")
     public ResponseEntity<OrderResponseDto> updateOrderStatus(
             @PathVariable UUID id,
             @RequestParam String status) {
