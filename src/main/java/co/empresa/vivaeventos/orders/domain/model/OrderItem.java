@@ -43,4 +43,13 @@ public class OrderItem {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal subtotal;
 
+    @Column(name = "holder_name", length = 255)
+    private String holderName;
+
+    @Column(name = "holder_email", length = 255)
+    private String holderEmail;
+
+    @Column(name = "holder_document", length = 50)
+    private String holderDocument;
+
 }
