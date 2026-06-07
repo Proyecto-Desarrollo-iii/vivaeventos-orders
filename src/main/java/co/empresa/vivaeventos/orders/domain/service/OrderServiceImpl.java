@@ -85,6 +85,8 @@ public class OrderServiceImpl implements IOrderService {
         order.setSubtotal(total);
         order.setTotal(total);
 
+        order = orderRepository.save(order);
+
         if (request.getPromoCode() != null && !request.getPromoCode().isBlank()) {
             applyPromoCode(request, order, total);
         }
