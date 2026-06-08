@@ -1,7 +1,7 @@
 package co.empresa.vivaeventos.orders.domain.service;
 
-import co.empresa.vivaeventos.orders.domain.model.dto.OrderRequestDto;
-import co.empresa.vivaeventos.orders.domain.model.dto.OrderResponseDto;
+import co.empresa.vivaeventos.orders.domain.model.Dto.OrderRequestDto;
+import co.empresa.vivaeventos.orders.domain.model.Dto.OrderResponseDto;
 
 import java.util.List;
 import java.util.UUID;
