@@ -3,8 +3,8 @@ package co.empresa.vivaeventos.orders.domain.service;
 import co.empresa.vivaeventos.orders.domain.model.Order;
 import co.empresa.vivaeventos.orders.domain.model.PromoCode;
 import co.empresa.vivaeventos.orders.domain.model.PromoCodeUsage;
-import co.empresa.vivaeventos.orders.domain.model.Dto.OrderRequestDto;
-import co.empresa.vivaeventos.orders.domain.model.Dto.OrderRequestDto.OrderItemRequest;
+import co.empresa.vivaeventos.orders.domain.model.dto.OrderRequestDto;
+import co.empresa.vivaeventos.orders.domain.model.dto.OrderRequestDto.OrderItemRequest;
 import co.empresa.vivaeventos.orders.domain.repository.IOrderRepository;
 import co.empresa.vivaeventos.orders.domain.repository.IPromoCodeRepository;
 import co.empresa.vivaeventos.orders.domain.repository.IPromoCodeUsageRepository;
@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.client.RestTemplate;
 
+import co.empresa.vivaeventos.orders.config.AuditEventClient;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -41,6 +42,8 @@ class OrderServiceImplConcurrencyTest {
     private IPromoCodeUsageRepository promoCodeUsageRepository;
     @Mock
     private RestTemplate restTemplate;
+    @Mock
+    private AuditEventClient auditEventClient;
 
     private OrderServiceImpl service;
     private OrderRequestDto request;
@@ -48,7 +51,7 @@ class OrderServiceImplConcurrencyTest {
 
     @BeforeEach
     void setUp() {
-        service = new OrderServiceImpl(orderRepository, promoCodeRepository, promoCodeUsageRepository, restTemplate);
+        service = new OrderServiceImpl(orderRepository, promoCodeRepository, promoCodeUsageRepository, restTemplate, auditEventClient);
 
         OrderItemRequest item = new OrderItemRequest();
         item.setEventId(UUID.randomUUID());

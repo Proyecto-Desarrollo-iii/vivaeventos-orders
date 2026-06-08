@@ -1,8 +1,8 @@
 package co.empresa.vivaeventos.orders.domain.service;
 
 import co.empresa.vivaeventos.orders.domain.model.PromoCode;
-import co.empresa.vivaeventos.orders.domain.model.Dto.PromoCodeRequestDto;
-import co.empresa.vivaeventos.orders.domain.model.Dto.PromoCodeResponseDto;
+import co.empresa.vivaeventos.orders.domain.model.dto.PromoCodeRequestDto;
+import co.empresa.vivaeventos.orders.domain.model.dto.PromoCodeResponseDto;
 import co.empresa.vivaeventos.orders.domain.repository.IPromoCodeRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
