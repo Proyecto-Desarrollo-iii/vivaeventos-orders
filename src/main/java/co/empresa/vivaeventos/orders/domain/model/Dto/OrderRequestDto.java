@@ -1,4 +1,4 @@
-package co.empresa.vivaeventos.orders.domain.model.dto;
+package co.empresa.vivaeventos.orders.domain.model.Dto;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
