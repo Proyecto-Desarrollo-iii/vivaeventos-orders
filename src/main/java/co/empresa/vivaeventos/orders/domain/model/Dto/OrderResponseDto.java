@@ -1,4 +1,4 @@
-package co.empresa.vivaeventos.orders.domain.model.Dto;
+package co.empresa.vivaeventos.orders.domain.model.dto;
 
 import lombok.*;
 

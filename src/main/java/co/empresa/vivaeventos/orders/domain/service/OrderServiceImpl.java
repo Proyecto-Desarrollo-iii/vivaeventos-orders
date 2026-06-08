@@ -4,11 +4,12 @@ import co.empresa.vivaeventos.orders.domain.model.Order;
 import co.empresa.vivaeventos.orders.domain.model.OrderItem;
 import co.empresa.vivaeventos.orders.domain.model.PromoCode;
 import co.empresa.vivaeventos.orders.domain.model.PromoCodeUsage;
-import co.empresa.vivaeventos.orders.domain.model.Dto.OrderRequestDto;
-import co.empresa.vivaeventos.orders.domain.model.Dto.OrderRequestDto.OrderItemRequest;
-import co.empresa.vivaeventos.orders.domain.model.Dto.OrderResponseDto;
-import co.empresa.vivaeventos.orders.domain.model.Dto.OrderResponseDto.OrderItemResponse;
+import co.empresa.vivaeventos.orders.domain.model.dto.OrderRequestDto;
+import co.empresa.vivaeventos.orders.domain.model.dto.OrderRequestDto.OrderItemRequest;
+import co.empresa.vivaeventos.orders.domain.model.dto.OrderResponseDto;
+import co.empresa.vivaeventos.orders.domain.model.dto.OrderResponseDto.OrderItemResponse;
 import co.empresa.vivaeventos.orders.config.AuditEventClient;
+import co.empresa.vivaeventos.orders.config.AuditEventRequest;
 import co.empresa.vivaeventos.orders.domain.repository.IOrderRepository;
 import co.empresa.vivaeventos.orders.domain.repository.IPromoCodeRepository;
 import co.empresa.vivaeventos.orders.domain.repository.IPromoCodeUsageRepository;
@@ -96,10 +97,10 @@ public class OrderServiceImpl implements IOrderService {
         order.setTotal(order.getSubtotal().subtract(order.getDiscount()));
         order = orderRepository.save(order);
 
-        auditEventClient.logEvent("orders",
+        auditEventClient.logEvent(new AuditEventRequest("orders",
                 request.getUserId() != null ? request.getUserId().toString() : null,
                 null, "CREAR_ORDEN", "orden", order.getId().toString(),
-                null, "{\"status\":\"PENDING\",\"total\":" + order.getTotal() + "}");
+                null, "{\"status\":\"PENDING\",\"total\":" + order.getTotal() + "}"));
 
         return toResponseDto(order);
     }
@@ -209,11 +210,11 @@ public class OrderServiceImpl implements IOrderService {
         order.setStatus(status.toUpperCase());
         order = orderRepository.save(order);
 
-        auditEventClient.logEvent("orders",
+        auditEventClient.logEvent(new AuditEventRequest("orders",
                 order.getUserId() != null ? order.getUserId().toString() : null,
                 null, "ACTUALIZAR_ESTADO_ORDEN", "orden", order.getId().toString(),
                 "{\"status\":\"" + oldStatus + "\"}",
-                "{\"status\":\"" + status.toUpperCase() + "\"}");
+                "{\"status\":\"" + status.toUpperCase() + "\"}"));
 
         return toResponseDto(order);
     }
@@ -226,10 +227,10 @@ public class OrderServiceImpl implements IOrderService {
         order.setStatus("CANCELLED");
         orderRepository.save(order);
 
-        auditEventClient.logEvent("orders",
+        auditEventClient.logEvent(new AuditEventRequest("orders",
                 order.getUserId() != null ? order.getUserId().toString() : null,
                 null, "CANCELAR_ORDEN", "orden", order.getId().toString(),
-                null, "{\"status\":\"CANCELLED\"}");
+                null, "{\"status\":\"CANCELLED\"}"));
     }
 
     private void validatePromoCode(PromoCode promo, BigDecimal total) {

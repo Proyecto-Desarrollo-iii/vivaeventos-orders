@@ -1,7 +1,7 @@
 package co.empresa.vivaeventos.orders.delivery.rest;
 
-import co.empresa.vivaeventos.orders.domain.model.Dto.PromoCodeRequestDto;
-import co.empresa.vivaeventos.orders.domain.model.Dto.PromoCodeResponseDto;
+import co.empresa.vivaeventos.orders.domain.model.dto.PromoCodeRequestDto;
+import co.empresa.vivaeventos.orders.domain.model.dto.PromoCodeResponseDto;
 import co.empresa.vivaeventos.orders.domain.service.IPromoCodeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

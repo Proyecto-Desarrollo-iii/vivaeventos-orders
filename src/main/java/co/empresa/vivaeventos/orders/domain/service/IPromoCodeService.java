@@ -1,7 +1,7 @@
 package co.empresa.vivaeventos.orders.domain.service;
 
-import co.empresa.vivaeventos.orders.domain.model.Dto.PromoCodeRequestDto;
-import co.empresa.vivaeventos.orders.domain.model.Dto.PromoCodeResponseDto;
+import co.empresa.vivaeventos.orders.domain.model.dto.PromoCodeRequestDto;
+import co.empresa.vivaeventos.orders.domain.model.dto.PromoCodeResponseDto;
 
 import java.util.List;
 import java.util.UUID;
