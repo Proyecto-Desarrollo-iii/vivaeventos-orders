@@ -13,6 +13,7 @@ import co.empresa.vivaeventos.orders.config.AuditEventRequest;
 import co.empresa.vivaeventos.orders.domain.repository.IOrderRepository;
 import co.empresa.vivaeventos.orders.domain.repository.IPromoCodeRepository;
 import co.empresa.vivaeventos.orders.domain.repository.IPromoCodeUsageRepository;
+import io.micrometer.observation.annotation.Observed;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,6 +50,7 @@ public class OrderServiceImpl implements IOrderService {
     @Value("${services.tickets.url:http://tickets:8085}")
     private String ticketsUrl;
 
+    @Observed(name = "orders.create_order", contextualName = "createOrder")
     @Override
     @Transactional
     public OrderResponseDto createOrder(OrderRequestDto request, String authHeader) {
